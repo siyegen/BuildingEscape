@@ -11,6 +11,8 @@ UOpenDoor::UOpenDoor()
 	// off to improve performance if you don't need them.
 	bWantsBeginPlay = true;
 	PrimaryComponentTick.bCanEverTick = true;
+	MaxYawRotation = 70.f;
+	YawRotationValue = 2.f;
 
 	// ...
 }
@@ -21,11 +23,10 @@ void UOpenDoor::BeginPlay()
 {
 	Super::BeginPlay();
 
-	auto Owner = GetOwner();
-	Owner->GetTransform().GetRotation();
-	FRotator NewRotation = FRotator(0.0f, 90.0f, 0.0f);
+	//auto Owner = GetOwner();
+	//FRotator NewRotation = FRotator(0.0f, 90.0f, 0.0f);
 
-	Owner->SetActorRotation(NewRotation);
+	//Owner->SetActorRotation(NewRotation);
 }
 
 
@@ -34,6 +35,15 @@ void UOpenDoor::TickComponent( float DeltaTime, ELevelTick TickType, FActorCompo
 {
 	Super::TickComponent( DeltaTime, TickType, ThisTickFunction );
 
-	// ...
+	if (TickType != ELevelTick::LEVELTICK_PauseTick) {
+		auto Owner = GetOwner();
+		float CurrentYaw = Owner->GetActorRotation().Yaw;
+		if (CurrentYaw < MaxYawRotation) {
+
+			FRotator NewRotation = FRotator(0.0f, CurrentYaw + YawRotationValue, 0.0f);
+
+			Owner->SetActorRotation(NewRotation);
+		}
+	}
 }
 
