@@ -21,8 +21,17 @@ public:
 	// Called every frame
 	virtual void TickComponent( float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction ) override;
 
+	// Opens the door
+	void OpenDoor();
+
 private:
-	float MaxYawRotation;
-	float YawRotationValue;
-	
+	UPROPERTY(EditAnywhere)
+	float MaxOpenAngle;
+	float OpenByValue;
+
+	UPROPERTY(EditAnywhere)
+	ATriggerVolume* PressurePlate;
+
+	AActor* ActorThatOpens;
+
 };

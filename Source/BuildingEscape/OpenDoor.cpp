@@ -11,8 +11,8 @@ UOpenDoor::UOpenDoor()
 	// off to improve performance if you don't need them.
 	bWantsBeginPlay = true;
 	PrimaryComponentTick.bCanEverTick = true;
-	MaxYawRotation = 70.f;
-	YawRotationValue = 2.f;
+	MaxOpenAngle = 70.f;
+	OpenByValue = 2.f;
 
 	// ...
 }
@@ -23,10 +23,7 @@ void UOpenDoor::BeginPlay()
 {
 	Super::BeginPlay();
 
-	//auto Owner = GetOwner();
-	//FRotator NewRotation = FRotator(0.0f, 90.0f, 0.0f);
-
-	//Owner->SetActorRotation(NewRotation);
+	ActorThatOpens = GetWorld()->GetFirstPlayerController()->GetPawn();
 }
 
 
@@ -36,14 +33,21 @@ void UOpenDoor::TickComponent( float DeltaTime, ELevelTick TickType, FActorCompo
 	Super::TickComponent( DeltaTime, TickType, ThisTickFunction );
 
 	if (TickType != ELevelTick::LEVELTICK_PauseTick) {
-		auto Owner = GetOwner();
-		float CurrentYaw = Owner->GetActorRotation().Yaw;
-		if (CurrentYaw < MaxYawRotation) {
-
-			FRotator NewRotation = FRotator(0.0f, CurrentYaw + YawRotationValue, 0.0f);
-
-			Owner->SetActorRotation(NewRotation);
+		// Poll the Trigger Volume to see if should trigger
+		if (PressurePlate->IsOverlappingActor(ActorThatOpens)) {
+			OpenDoor();
 		}
+	}
+}
+
+void UOpenDoor::OpenDoor() {
+	auto Owner = GetOwner();
+	float CurrentYaw = Owner->GetActorRotation().Yaw;
+	if (CurrentYaw < MaxOpenAngle) {
+
+		FRotator NewRotation = FRotator(0.0f, CurrentYaw + OpenByValue, 0.0f);
+
+		Owner->SetActorRotation(NewRotation);
 	}
 }
 
