@@ -37,4 +37,6 @@ private:
 	void Release();
 
 	const FHitResult GetFirstPhysicsBodyInReach();
+	FVector GetLineTraceStart();
+	FVector GetLineTraceEnd();
 };

@@ -13,7 +13,6 @@ UGrabber::UGrabber()
 	PrimaryComponentTick.bCanEverTick = true;
 }
 
-
 // Called when the game starts
 void UGrabber::BeginPlay()
 {
@@ -46,10 +45,7 @@ void UGrabber::TickComponent( float DeltaTime, ELevelTick TickType, FActorCompon
 {
 	Super::TickComponent( DeltaTime, TickType, ThisTickFunction );
 	if (PhysicsHandle->GrabbedComponent) {
-		FVector Location;
-		FRotator rotator;
-		Player->GetPlayerViewPoint(Location, rotator);
-		FVector LineTraceEnd = Location + rotator.Vector() * Reach;
+		FVector LineTraceEnd = GetLineTraceEnd();
 		PhysicsHandle->SetTargetLocation(LineTraceEnd);
 	}
 }
@@ -65,7 +61,7 @@ void UGrabber::Grab() {
 			Hit.GetComponent(),
 			NAME_None,
 			ToGrab->GetOwner()->GetActorLocation(),
-			false
+			true
 		);
 	}
 }
@@ -77,23 +73,29 @@ void UGrabber::Release() {
 
 const FHitResult UGrabber::GetFirstPhysicsBodyInReach() {
 	FHitResult LineHit;
-	FVector Location;
-	FRotator rotator;
-	Player->GetPlayerViewPoint(Location, rotator);
-	FVector LineTraceEnd = Location + rotator.Vector() * Reach;
 
 	FCollisionQueryParams TraceParams = FCollisionQueryParams(FName(TEXT("")), false, Owner);
-	bool DidHit = GetWorld()->LineTraceSingleByObjectType(
+	GetWorld()->LineTraceSingleByObjectType(
 		LineHit,
-		Location,
-		LineTraceEnd,
+		GetLineTraceStart(),
+		GetLineTraceEnd(),
 		FCollisionObjectQueryParams(ECollisionChannel::ECC_PhysicsBody),
 		TraceParams
-		);
-
-	if (DidHit) {
-		UE_LOG(LogTemp, Warning, TEXT("Hit %s"), *LineHit.Actor->GetName());
-	}
+	);
 	return LineHit;
+}
+
+FVector UGrabber::GetLineTraceStart() {
+	FVector Location;
+	FRotator Rotator;
+	Player->GetPlayerViewPoint(Location, Rotator);
+	return Location;
+}
+
+FVector UGrabber::GetLineTraceEnd() {
+	FVector Location;
+	FRotator Rotator;
+	Player->GetPlayerViewPoint(Location, Rotator);
+	return Location + Rotator.Vector() * Reach;;
 }
 
