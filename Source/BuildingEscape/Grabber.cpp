@@ -36,13 +36,27 @@ void UGrabber::TickComponent( float DeltaTime, ELevelTick TickType, FActorCompon
 {
 	Super::TickComponent( DeltaTime, TickType, ThisTickFunction );
 
-	FVector location;
+	FVector Location;
 	FRotator rotator;
-	Player->GetPlayerViewPoint(location, rotator);
-	//UE_LOG(LogTemp, Warning, TEXT("location: %s, rot: %s"), *location.ToString(), *rotator.ToString());
-	FVector LineTraceEnd = location + rotator.Vector() * Reach;
+	Player->GetPlayerViewPoint(Location, rotator);
+	///UE_LOG(LogTemp, Warning, TEXT("location: %s, rot: %s"), *location.ToString(), *rotator.ToString());
+	FVector LineTraceEnd = Location + rotator.Vector() * Reach;
 
-	// Draw red trace in the world
-	DrawDebugLine(GetWorld(), location, LineTraceEnd, FColor(255, 0, 0), false, 0.f, 0.f, 10.f);
+	FCollisionQueryParams TraceParams = FCollisionQueryParams(FName(TEXT("")), false, Owner);
+
+	/// Draw red trace in the world
+	FHitResult LineHit;
+	DrawDebugLine(GetWorld(), Location, LineTraceEnd, FColor(255, 0, 0), false, 0.f, 0.f, 10.f);
+	bool DidHit = GetWorld()->LineTraceSingleByObjectType(
+		LineHit,
+		Location,
+		LineTraceEnd,
+		FCollisionObjectQueryParams(ECollisionChannel::ECC_PhysicsBody),
+		TraceParams
+	);
+
+	if (DidHit) {
+		UE_LOG(LogTemp, Warning, TEXT("Hit %s"), *LineHit.Actor->GetName());
+	}
 }
 
