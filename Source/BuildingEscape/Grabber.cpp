@@ -24,7 +24,6 @@ void UGrabber::BeginPlay()
 	SetupInputComponent();
 }
 
-
 void UGrabber::SetupPhysicsComponent() {
 	PhysicsHandle = Owner->FindComponentByClass<UPhysicsHandleComponent>();
 	if (!PhysicsHandle) {
@@ -46,15 +45,34 @@ void UGrabber::SetupInputComponent() {
 void UGrabber::TickComponent( float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction )
 {
 	Super::TickComponent( DeltaTime, TickType, ThisTickFunction );
+	if (PhysicsHandle->GrabbedComponent) {
+		FVector Location;
+		FRotator rotator;
+		Player->GetPlayerViewPoint(Location, rotator);
+		FVector LineTraceEnd = Location + rotator.Vector() * Reach;
+		PhysicsHandle->SetTargetLocation(LineTraceEnd);
+	}
 }
 
 void UGrabber::Grab() {
 	UE_LOG(LogTemp, Warning, TEXT("Grab Pressed"));
-	GetFirstPhysicsBodyInReach();
+	FHitResult Hit = GetFirstPhysicsBodyInReach();
+	UPrimitiveComponent* ToGrab = Hit.GetComponent();
+	AActor* ActorHit = Hit.GetActor();
+
+	if (ActorHit) {
+		PhysicsHandle->GrabComponent(
+			Hit.GetComponent(),
+			NAME_None,
+			ToGrab->GetOwner()->GetActorLocation(),
+			false
+		);
+	}
 }
 
 void UGrabber::Release() {
 	UE_LOG(LogTemp, Warning, TEXT("Grab Released"));
+	PhysicsHandle->ReleaseComponent();
 }
 
 const FHitResult UGrabber::GetFirstPhysicsBodyInReach() {
