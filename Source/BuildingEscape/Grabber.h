@@ -26,4 +26,15 @@ public:
 
 private:
 	float Reach = 100.f;
+
+	void SetupPhysicsComponent();
+	void SetupInputComponent();
+
+	UPhysicsHandleComponent* PhysicsHandle = nullptr;
+	UInputComponent* Input = nullptr;
+
+	void Grab(); // raycast and grab
+	void Release();
+
+	const FHitResult GetFirstPhysicsBodyInReach();
 };
