@@ -22,7 +22,7 @@ UOpenDoor::UOpenDoor()
 void UOpenDoor::BeginPlay()
 {
 	Super::BeginPlay();
-
+	Owner = GetOwner();
 	ActorThatOpens = GetWorld()->GetFirstPlayerController()->GetPawn();
 }
 
@@ -34,20 +34,35 @@ void UOpenDoor::TickComponent( float DeltaTime, ELevelTick TickType, FActorCompo
 
 	if (TickType != ELevelTick::LEVELTICK_PauseTick) {
 		// Poll the Trigger Volume to see if should trigger
-		if (PressurePlate->IsOverlappingActor(ActorThatOpens)) {
-			OpenDoor();
+		if (PressurePlate->IsOverlappingActor(ActorThatOpens)) {  // update to set flag
+			IsOpening = true;
+			LastDoorOpenTime = GetWorld()->GetTimeSeconds();
 		}
+		if (IsOpening && GetWorld()->GetTimeSeconds() - LastDoorOpenTime > DoorCloseDelay) {
+			IsClosing = true, IsOpening = false;
+		}
+	}
+	if (IsOpening) {
+		OpenDoor();
+	} else if (IsClosing) {
+		CloseDoor();
 	}
 }
 
 void UOpenDoor::OpenDoor() {
-	auto Owner = GetOwner();
 	float CurrentYaw = Owner->GetActorRotation().Yaw;
 	if (CurrentYaw < MaxOpenAngle) {
 
 		FRotator NewRotation = FRotator(0.0f, CurrentYaw + OpenByValue, 0.0f);
 
 		Owner->SetActorRotation(NewRotation);
+	}
+}
+
+void UOpenDoor::CloseDoor() {
+	float CurrentYaw = Owner->GetActorRotation().Yaw;
+	if (CurrentYaw > 0) {
+		Owner->SetActorRotation(FRotator(0.f, CurrentYaw - OpenByValue, 0.f));
 	}
 }
 
