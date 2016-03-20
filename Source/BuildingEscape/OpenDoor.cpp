@@ -7,14 +7,8 @@
 // Sets default values for this component's properties
 UOpenDoor::UOpenDoor()
 {
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
 	bWantsBeginPlay = true;
 	PrimaryComponentTick.bCanEverTick = true;
-	MaxOpenAngle = 70.f;
-	OpenByValue = 2.f;
-
-	// ...
 }
 
 
@@ -23,7 +17,6 @@ void UOpenDoor::BeginPlay()
 {
 	Super::BeginPlay();
 	Owner = GetOwner();
-	ActorThatOpens = GetWorld()->GetFirstPlayerController()->GetPawn();
 }
 
 
@@ -34,7 +27,8 @@ void UOpenDoor::TickComponent( float DeltaTime, ELevelTick TickType, FActorCompo
 
 	if (TickType != ELevelTick::LEVELTICK_PauseTick) {
 		// Poll the Trigger Volume to see if should trigger
-		if (PressurePlate->IsOverlappingActor(ActorThatOpens)) {  // update to set flag
+		//if (PressurePlate->IsOverlappingActor(ActorThatOpens)) {  // update to set flag
+		if (GetTotalMassOfActorsOnPlate() > OpenMassKG) {
 			IsOpening = true;
 			LastDoorOpenTime = GetWorld()->GetTimeSeconds();
 		}
@@ -64,5 +58,19 @@ void UOpenDoor::CloseDoor() {
 	if (CurrentYaw > 0) {
 		Owner->SetActorRotation(FRotator(0.f, CurrentYaw - OpenByValue, 0.f));
 	}
+}
+
+float UOpenDoor::GetTotalMassOfActorsOnPlate() {
+	float TotalMass = 0.f;
+
+	TArray<AActor*> OverlappingActors;
+	PressurePlate->GetOverlappingActors(OverlappingActors);
+	for (const auto& Actor : OverlappingActors) {
+		TotalMass += Actor->FindComponentByClass<UPrimitiveComponent>()->GetMass();
+		UE_LOG(LogTemp, Warning, TEXT("%s on plate"), *Actor->GetName());
+	}
+	UE_LOG(LogTemp, Warning, TEXT("totalweight: %f"), TotalMass);
+
+	return TotalMass;
 }
 

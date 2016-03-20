@@ -24,11 +24,15 @@ public:
 	void OpenDoor();
 	void CloseDoor();
 
+	float GetTotalMassOfActorsOnPlate();
+
 private:
 	UPROPERTY(EditAnywhere)
-	float MaxOpenAngle;
+	float MaxOpenAngle = 70.f;
 	UPROPERTY(EditAnywhere)
-	float OpenByValue;
+	float OpenByValue = 2.f;
+	UPROPERTY(EditAnywhere)
+	float OpenMassKG  = 30.f;
 
 	bool IsOpening = false;
 	bool IsClosing = false;
@@ -41,7 +45,6 @@ private:
 
 	float LastDoorOpenTime;
 
-	AActor* ActorThatOpens;
 	AActor* Owner;
 
 };
