@@ -25,6 +25,7 @@ public:
 	APlayerController* Player;
 
 private:
+	UPROPERTY(EditAnywhere)
 	float Reach = 100.f;
 
 	void SetupPhysicsComponent();
