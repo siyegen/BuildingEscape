@@ -22,8 +22,6 @@ void UOpenDoor::BeginPlay()
 	}
 }
 
-
-// Called every frame
 void UOpenDoor::TickComponent( float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction )
 {
 	Super::TickComponent( DeltaTime, TickType, ThisTickFunction );
@@ -32,34 +30,10 @@ void UOpenDoor::TickComponent( float DeltaTime, ELevelTick TickType, FActorCompo
 		// Poll the Trigger Volume to see if should trigger
 		//if (PressurePlate->IsOverlappingActor(ActorThatOpens)) {  // update to set flag
 		if (GetTotalMassOfActorsOnPlate() > OpenMassKG) {
-			IsOpening = true;
-			LastDoorOpenTime = GetWorld()->GetTimeSeconds();
+			OnOpen.Broadcast();
+		} else {
+			OnClose.Broadcast();
 		}
-		if (IsOpening && GetWorld()->GetTimeSeconds() - LastDoorOpenTime > DoorCloseDelay) {
-			IsClosing = true, IsOpening = false;
-		}
-	}
-	if (IsOpening) {
-		OpenDoor();
-	} else if (IsClosing) {
-		CloseDoor();
-	}
-}
-
-void UOpenDoor::OpenDoor() {
-	float CurrentYaw = Owner->GetActorRotation().Yaw;
-	if (CurrentYaw < MaxOpenAngle) {
-
-		FRotator NewRotation = FRotator(0.0f, CurrentYaw + OpenByValue, 0.0f);
-
-		Owner->SetActorRotation(NewRotation);
-	}
-}
-
-void UOpenDoor::CloseDoor() {
-	float CurrentYaw = Owner->GetActorRotation().Yaw;
-	if (CurrentYaw > 0) {
-		Owner->SetActorRotation(FRotator(0.f, CurrentYaw - OpenByValue, 0.f));
 	}
 }
 
